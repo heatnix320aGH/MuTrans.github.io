@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ave Mujica 극장판 특전 교환 도우미</title>
+    <!-- Tailwind CSS 로드 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Noto Sans KR & Cinzel (고딕/분위기용) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #0f0c13;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+        /* 고딕풍 장식 테두리 및 애니메이션 */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+        .animate-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        /* 결과 화면 40% - 20% - 40% 정확한 비율 보장 */
+        .result-top {
+            height: 40vh;
+            height: 40dvh;
+        }
+        .result-middle {
+            height: 20vh;
+            height: 20dvh;
+        }
+        .result-bottom {
+            height: 40vh;
+            height: 40dvh;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-900 selection:text-white">
+
+    <!-- ==================== 1. 선택 화면 (Selection View) ==================== -->
+    <div id="selection-screen" class="max-w-md w-full mx-auto p-4 sm:p-6 flex-1 flex flex-col justify-between transition-opacity duration-300">
+        
+        <!-- 헤더 영역 -->
+        <header class="text-center pt-2 pb-4 border-b border-purple-900/40">
+            <p class="font-cinzel text-xs tracking-[0.25em] text-purple-400 uppercase mb-1">BanG Dream! Ave Mujica</p>
+            <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center justify-center gap-2">
+                <span>🎭</span> 극장판 특전 교환기
+            </h1>
+            <p class="text-xs text-gray-400 mt-1.5">보유한 특전과 원하는 특전을 선택해 화면을 보여주세요!</p>
+        </header>
+
+        <!-- 메인 선택 영역 -->
+        <main class="my-auto py-4 space-y-6">
+            
+            <!-- STEP 1: 내가 가진 캐릭터 (A) -->
+            <section class="bg-[#18141f] p-4 rounded-2xl border border-gray-800 shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="inline-flex items-center gap-1.5 text-sm font-bold text-amber-300">
+                        <span class="w-5 h-5 rounded-full bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs">1</span>
+                        내가 얻은 특전 (보유)
+                    </span>
+                    <span id="selected-a-badge" class="text-xs font-medium text-gray-400">선택해주세요</span>
+                </div>
+                <!-- 5명 캐릭터 그리드 -->
+                <div id="grid-char-a" class="grid grid-cols-5 gap-2">
+                    <!-- JS로 동적 렌더링 -->
+                </div>
+            </section>
+
+            <!-- 교환 화살표 아이콘 -->
+            <div class="flex justify-center -my-3 relative z-10">
+                <div class="bg-[#231d2e] border border-purple-500/40 p-2 rounded-full shadow-md text-purple-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- STEP 2: 내가 원하는 캐릭터 (B) -->
+            <section class="bg-[#18141f] p-4 rounded-2xl border border-gray-800 shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="inline-flex items-center gap-1.5 text-sm font-bold text-sky-300">
+                        <span class="w-5 h-5 rounded-full bg-sky-500/20 text-sky-300 flex items-center justify-center text-xs">2</span>
+                        내가 원하는 특전 (희망)
+                    </span>
+                    <span id="selected-b-badge" class="text-xs font-medium text-gray-400">선택해주세요</span>
+                </div>
+                <!-- 5명 캐릭터 그리드 -->
+                <div id="grid-char-b" class="grid grid-cols-5 gap-2">
+                    <!-- JS로 동적 렌더링 -->
+                </div>
+            </section>
+
+            <!-- 이름 표기 방식 옵션 -->
+            <div class="flex items-center justify-center gap-3 text-xs text-gray-400 pt-1">
+                <span>이름 표기:</span>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="nameMode" value="stage" checked class="sr-only peer" onchange="updateNameMode('stage')">
+                    <span class="px-3 py-1 rounded-full bg-gray-800 peer-checked:bg-purple-700 peer-checked:text-white transition">활동명 (돌로리스)</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="nameMode" value="real" class="sr-only peer" onchange="updateNameMode('real')">
+                    <span class="px-3 py-1 rounded-full bg-gray-800 peer-checked:bg-purple-700 peer-checked:text-white transition">본명 (우이카)</span>
+                </label>
+            </div>
+        </main>
+
+        <!-- 하단 실행 버튼 및 안내 메시지 -->
+        <footer class="pt-2 pb-4">
+            <div id="error-toast" class="hidden mb-3 p-2.5 rounded-xl bg-rose-950/90 border border-rose-500/50 text-rose-200 text-xs text-center font-medium">
+                보유 캐릭터와 희망 캐릭터를 모두 선택해주세요!
+            </div>
+            <button id="generate-btn" onclick="showResultScreen()" 
+                class="w-full py-4 rounded-2xl font-bold text-base tracking-wide text-white bg-gradient-to-r from-purple-700 via-indigo-700 to-purple-800 hover:from-purple-600 hover:to-indigo-600 active:scale-[0.98] transition-all shadow-lg shadow-purple-950/60 border border-purple-400/30 flex items-center justify-center gap-2">
+                <span>교환 전광판 띄우기</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </footer>
+    </div>
+
+    <!-- ==================== 2. 결과 화면 (Result Fullscreen View: 40% - 20% - 40%) ==================== -->
+    <div id="result-screen" class="hidden fixed inset-0 w-full h-full z-50 flex flex-col select-none overflow-hidden bg-black">
+        
+        <!-- 뒤로가기 (다시 선택) 플로팅 버튼 -->
+        <button onclick="showSelectionScreen()" aria-label="다시 선택하기"
+            class="fixed top-3 right-3 z-50 bg-black/50 hover:bg-black/75 backdrop-blur-md text-white/90 px-3 py-1.5 rounded-full text-xs font-medium border border-white/20 flex items-center gap-1 transition active:scale-95 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            다시 선택
+        </button>
+
+        <!-- [상단 40%] A 캐릭터 영역 (내가 드리는 특전) -->
+        <div id="result-top-panel" class="result-top w-full relative flex flex-col items-center justify-center p-4 transition-colors duration-500 overflow-hidden">
+            <!-- 배경 은은한 문양 -->
+            <div class="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
+                <div class="w-72 h-72 rounded-full border-[16px] border-white"></div>
+            </div>
+            
+            <!-- 상단 라벨 -->
+            <span class="relative z-10 px-3 py-1 rounded-full bg-black/35 backdrop-blur-sm text-white text-xs sm:text-sm font-bold tracking-wider mb-2 border border-white/20">
+                🎁 저에게 있는 특전 (드릴게요)
+            </span>
+
+            <!-- 캐릭터 일러스트/심볼 카드 & 이름 -->
+            <div class="relative z-10 flex items-center gap-4 sm:gap-6 max-w-md w-full justify-center">
+                <!-- 캐릭터 고품질 벡터 아바타 -->
+                <div id="res-a-avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-black/25 backdrop-blur-md border-2 border-white/40 shadow-2xl flex items-center justify-center shrink-0 overflow-hidden p-1">
+                </div>
+                <div class="text-left text-white drop-shadow-md">
+                    <p id="res-a-subname" class="text-xs sm:text-sm font-semibold opacity-90 tracking-wide">미스미 우이카</p>
+                    <h2 id="res-a-mainname" class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">돌로리스</h2>
+                    <p id="res-a-enname" class="font-cinzel text-xs sm:text-sm opacity-75 tracking-widest mt-0.5">DOLORIS</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- [가운데 20%] 교환 요청 메시지 영역 -->
+        <div class="result-middle w-full bg-[#110d17] border-y-2 border-white/20 flex flex-col items-center justify-center px-4 text-center relative z-20 shadow-[0_0_30px_rgba(0,0,0,0.85)]">
+            <p id="result-message-text" class="text-2xl sm:text-4xl font-black text-white tracking-tight leading-snug animate-glow break-keep">
+                <!-- JS로 '캐릭터A로 캐릭터B 구해요!' 삽입 -->
+            </p>
+            <p class="text-[11px] sm:text-xs text-purple-300/80 mt-1 font-medium">
+                극장판 특전 1:1 교환 희망합니다 🙏
+            </p>
+        </div>
+
+        <!-- [하단 40%] B 캐릭터 영역 (내가 구하는 특전) -->
+        <div id="result-bottom-panel" class="result-bottom w-full relative flex flex-col items-center justify-center p-4 transition-colors duration-500 overflow-hidden">
+            <!-- 배경 은은한 문양 -->
+            <div class="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
+                <div class="w-72 h-72 rounded-full border-[16px] border-white"></div>
+            </div>
+
+            <!-- 하단 라벨 -->
+            <span class="relative z-10 px-3 py-1 rounded-full bg-black/35 backdrop-blur-sm text-white text-xs sm:text-sm font-bold tracking-wider mb-2 border border-white/20">
+                ✨ 제가 구하는 특전 (원해요)
+            </span>
+
+            <!-- 캐릭터 일러스트/심볼 카드 & 이름 -->
+            <div class="relative z-10 flex items-center gap-4 sm:gap-6 max-w-md w-full justify-center">
+                <!-- 캐릭터 고품질 벡터 아바타 -->
+                <div id="res-b-avatar" class="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-black/25 backdrop-blur-md border-2 border-white/40 shadow-2xl flex items-center justify-center shrink-0 overflow-hidden p-1">
+                </div>
+                <div class="text-left text-white drop-shadow-md">
+                    <p id="res-b-subname" class="text-xs sm:text-sm font-semibold opacity-90 tracking-wide">토가와 사키코</p>
+                    <h2 id="res-b-mainname" class="text-3xl sm:text-5xl font-black tracking-tight leading-tight">오블리비오니스</h2>
+                    <p id="res-b-enname" class="font-cinzel text-xs sm:text-sm opacity-75 tracking-widest mt-0.5">OBLIVIONIS</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        /**
+         * Ave Mujica 5명의 주연 캐릭터 데이터
+         * 첨부된 이미지의 배경색, 이름표 색상, 본명/활동명 및 특징을 완벽하게 반영
+         */
+        const CHARACTERS = [
+            {
+                id: 'doloris',
+                stageName: '돌로리스',
+                realName: '미스미 우이카',
+                shortRealName: '우이카',
+                enName: 'DOLORIS',
+                role: 'Gt. & Vo.',
+                // 이미지 첫 번째 캐릭터의 골드/머스타드 톤
+                bgHex: '#9d7c38',
+                gradient: 'linear-gradient(135deg, #b89242 0%, #7d6024 100%)',
+                badgeBg: '#9d7c38',
+                hairColor: '#f5ebd6',
+                eyeColor: '#8b6bb1',
+                accentColor: '#d4af37',
+                // 캐릭터 특징을 살린 커스텀 SVG 초상화
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="46" fill="#826529" opacity="0.4"/>
+                        <!-- 금발 헤어 -->
+                        <path d="M22 65 Q18 25 50 20 Q82 25 78 65 Q75 82 68 85 L32 85 Q25 82 22 65Z" fill="#f7eed9"/>
+                        <!-- 얼굴 -->
+                        <path d="M33 44 Q33 70 50 72 Q67 70 67 44 Q67 30 50 30 Q33 30 33 44Z" fill="#ffe9dc"/>
+                        <!-- 앞머리 -->
+                        <path d="M31 44 Q38 26 50 26 Q62 26 69 44 Q62 34 55 43 Q50 32 45 43 Q38 34 31 44Z" fill="#f7eed9"/>
+                        <!-- 보라빛 눈동자 -->
+                        <ellipse cx="42" cy="50" rx="3.2" ry="4" fill="#7c5ba6"/>
+                        <ellipse cx="58" cy="50" rx="3.2" ry="4" fill="#7c5ba6"/>
+                        <circle cx="41" cy="48.5" r="1.2" fill="#fff"/>
+                        <circle cx="57" cy="48.5" r="1.2" fill="#fff"/>
+                        <!-- 고딕 의상 & 초승달 브로치 -->
+                        <path d="M26 88 Q32 72 50 72 Q68 72 74 88 Z" fill="#1e1c24"/>
+                        <circle cx="50" cy="78" r="3.5" fill="#d4af37"/>
+                      </svg>`
+            },
+            {
+                id: 'mortis',
+                stageName: '모르티스',
+                realName: '와카바 무츠미',
+                shortRealName: '무츠미',
+                enName: 'MORTIS',
+                role: 'Gt.',
+                // 이미지 두 번째 캐릭터의 세이지 그린 톤
+                bgHex: '#638367',
+                gradient: 'linear-gradient(135deg, #729676 0%, #4b664e 100%)',
+                badgeBg: '#638367',
+                hairColor: '#cce0d0',
+                eyeColor: '#b5965b',
+                accentColor: '#9e1b24',
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="46" fill="#47614a" opacity="0.4"/>
+                        <!-- 붉은 베레모 -->
+                        <ellipse cx="52" cy="24" rx="26" ry="12" transform="rotate(-8 52 24)" fill="#8f1922"/>
+                        <!-- 민트 은발 헤어 -->
+                        <path d="M25 78 Q23 30 50 26 Q77 30 75 78 Z" fill="#d5e6d8"/>
+                        <!-- 얼굴 -->
+                        <path d="M34 45 Q34 70 50 72 Q66 70 66 45 Q66 32 50 32 Q34 32 34 45Z" fill="#ffece0"/>
+                        <!-- 일자 앞머리 -->
+                        <path d="M32 43 Q50 38 68 43 Q65 28 50 28 Q35 28 32 43Z" fill="#d5e6d8"/>
+                        <!-- 금갈색 눈동자 -->
+                        <ellipse cx="42" cy="51" rx="3.2" ry="3.8" fill="#a8884c"/>
+                        <ellipse cx="58" cy="51" rx="3.2" ry="3.8" fill="#a8884c"/>
+                        <circle cx="41" cy="49.5" r="1.1" fill="#fff"/>
+                        <circle cx="57" cy="49.5" r="1.1" fill="#fff"/>
+                        <!-- 검은 의상 & 붉은 리본 -->
+                        <path d="M26 88 Q32 72 50 72 Q68 72 74 88 Z" fill="#1c1b21"/>
+                        <path d="M44 74 L50 78 L56 74 L54 82 L50 79 L46 82 Z" fill="#9e1b24"/>
+                      </svg>`
+            },
+            {
+                id: 'timoris',
+                stageName: '티모리스',
+                realName: '야하타 우미리',
+                shortRealName: '우미리',
+                enName: 'TIMORIS',
+                role: 'Ba.',
+                // 이미지 세 번째 캐릭터의 딥 슬레이트 블루/틸 톤
+                bgHex: '#2f4b57',
+                gradient: 'linear-gradient(135deg, #3b5c6b 0%, #213740 100%)',
+                badgeBg: '#2f4b57',
+                hairColor: '#36353a',
+                eyeColor: '#4c8c8a',
+                accentColor: '#a62129',
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="46" fill="#1e323b" opacity="0.4"/>
+                        <!-- 다크 브라운/블랙 울프컷 헤어 -->
+                        <path d="M24 72 Q20 26 50 22 Q80 26 76 72 L68 76 L32 76 Z" fill="#38363b"/>
+                        <!-- 얼굴 -->
+                        <path d="M34 45 Q34 70 50 72 Q66 70 66 45 Q66 32 50 32 Q34 32 34 45Z" fill="#fce6d8"/>
+                        <!-- 앞머리 -->
+                        <path d="M32 45 Q42 30 50 42 Q58 30 68 45 Q62 27 50 27 Q38 27 32 45Z" fill="#38363b"/>
+                        <!-- 청록색 눈동자 -->
+                        <ellipse cx="42" cy="51" rx="3.2" ry="3.8" fill="#468582"/>
+                        <ellipse cx="58" cy="51" rx="3.2" ry="3.8" fill="#468582"/>
+                        <circle cx="41" cy="49.5" r="1.1" fill="#fff"/>
+                        <circle cx="57" cy="49.5" r="1.1" fill="#fff"/>
+                        <!-- 붉은 케이프 의상 -->
+                        <path d="M25 88 Q32 72 50 72 Q68 72 75 88 Z" fill="#9c222a"/>
+                        <path d="M40 72 L50 86 L60 72 Z" fill="#e6dcc8"/>
+                      </svg>`
+            },
+            {
+                id: 'amoris',
+                stageName: '아모리스',
+                realName: '유텐지 냐무',
+                shortRealName: '냐무',
+                enName: 'AMORIS',
+                role: 'Dr.',
+                // 이미지 네 번째 캐릭터의 마젠타/자주빛 톤
+                bgHex: '#9d3b66',
+                gradient: 'linear-gradient(135deg, #b84879 0%, #78294c 100%)',
+                badgeBg: '#9d3b66',
+                hairColor: '#9c8fb5',
+                eyeColor: '#b83b68',
+                accentColor: '#e87aa4',
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="46" fill="#732748" opacity="0.4"/>
+                        <!-- 연보라 숏보브 헤어 -->
+                        <path d="M25 64 Q22 25 50 22 Q78 25 75 64 Q68 68 64 64 L36 64 Q32 68 25 64Z" fill="#a295bd"/>
+                        <!-- 얼굴 -->
+                        <path d="M34 45 Q34 70 50 72 Q66 70 66 45 Q66 32 50 32 Q34 32 34 45Z" fill="#ffe9de"/>
+                        <!-- 앞머리 -->
+                        <path d="M32 44 Q44 33 50 43 Q56 33 68 44 Q62 27 50 27 Q38 27 32 44Z" fill="#a295bd"/>
+                        <!-- 자주빛 눈동자 -->
+                        <ellipse cx="42" cy="51" rx="3.4" ry="4" fill="#b53866"/>
+                        <ellipse cx="58" cy="51" rx="3.4" ry="4" fill="#b53866"/>
+                        <circle cx="41" cy="49.5" r="1.2" fill="#fff"/>
+                        <circle cx="57" cy="49.5" r="1.2" fill="#fff"/>
+                        <!-- 스트라이프 고딕 의상 -->
+                        <path d="M26 88 Q32 72 50 72 Q68 72 74 88 Z" fill="#232029"/>
+                        <path d="M44 72 L50 88 L56 72 Z" fill="#8f2447"/>
+                      </svg>`
+            },
+            {
+                id: 'oblivionis',
+                stageName: '오블리비오니스',
+                realName: '토가와 사키코',
+                shortRealName: '사키코',
+                enName: 'OBLIVIONIS',
+                role: 'Key.',
+                // 이미지 다섯 번째 캐릭터의 스카이/아이스 블루 톤
+                bgHex: '#6694bd',
+                gradient: 'linear-gradient(135deg, #7aa8d1 0%, #4b759c 100%)',
+                badgeBg: '#6694bd',
+                hairColor: '#b8d0e0',
+                eyeColor: '#b59d45',
+                accentColor: '#254275',
+                svg: `<svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="46" fill="#497196" opacity="0.4"/>
+                        <!-- 양갈래 리본 -->
+                        <path d="M22 36 L34 42 L26 52 Z" fill="#1b1a21"/>
+                        <path d="M78 36 L66 42 L74 52 Z" fill="#1b1a21"/>
+                        <!-- 하늘색 롱 헤어 -->
+                        <path d="M20 82 Q20 25 50 22 Q80 25 80 82 Z" fill="#bcd3e3"/>
+                        <!-- 얼굴 -->
+                        <path d="M34 45 Q34 70 50 72 Q66 70 66 45 Q66 32 50 32 Q34 32 34 45Z" fill="#ffece3"/>
+                        <!-- 앞머리 -->
+                        <path d="M32 43 Q50 37 68 43 Q64 27 50 27 Q36 27 32 43Z" fill="#bcd3e3"/>
+                        <!-- 금안 눈동자 -->
+                        <ellipse cx="42" cy="51" rx="3.2" ry="3.9" fill="#b39a42"/>
+                        <ellipse cx="58" cy="51" rx="3.2" ry="3.9" fill="#b39a42"/>
+                        <circle cx="41" cy="49.5" r="1.2" fill="#fff"/>
+                        <circle cx="57" cy="49.5" r="1.2" fill="#fff"/>
+                        <!-- 버건디 & 블랙 의상 + 블루 보석 -->
+                        <path d="M26 88 Q32 72 50 72 Q68 72 74 88 Z" fill="#781d26"/>
+                        <circle cx="50" cy="78" r="3.5" fill="#2b5296" stroke="#d4af37" stroke-width="1"/>
+                      </svg>`
+            }
+        ];
+
+        // 상태 관리 변수
+        let selectedCharA = null; // 내가 가진 캐릭터 (A)
+        let selectedCharB = null; // 내가 원하는 캐릭터 (B)
+        let nameMode = 'stage';   // 'stage' (돌로리스 등) | 'real' (우이카 등)
+
+        /**
+         * 초기 렌더링: A와 B 선택 그리드 생성
+         */
+        function renderCharacterGrids() {
+            const gridA = document.getElementById('grid-char-a');
+            const gridB = document.getElementById('grid-char-b');
+
+            gridA.innerHTML = '';
+            gridB.innerHTML = '';
+
+            CHARACTERS.forEach(char => {
+                // A 그리드 버튼
+                const btnA = createCharacterCard(char, 'A');
+                gridA.appendChild(btnA);
+
+                // B 그리드 버튼
+                const btnB = createCharacterCard(char, 'B');
+                gridB.appendChild(btnB);
+            });
+        }
+
+        /**
+         * 개별 캐릭터 선택 카드 DOM 생성
+         */
+        function createCharacterCard(char, group) {
+            const isSelected = (group === 'A' && selectedCharA?.id === char.id) ||
+                               (group === 'B' && selectedCharB?.id === char.id);
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.onclick = () => selectCharacter(group, char);
+            
+            // 선택 여부에 따른 스타일 분기
+            const baseClasses = "flex flex-col items-center p-1.5 rounded-xl transition-all duration-200 border relative overflow-hidden group focus:outline-none";
+            const stateClasses = isSelected 
+                ? "border-white scale-105 shadow-lg ring-2 ring-white/60 bg-white/10" 
+                : "border-gray-700/70 bg-[#221d2b] opacity-80 hover:opacity-100 hover:border-gray-500";
+
+            button.className = `${baseClasses} ${stateClasses}`;
+            if (isSelected) {
+                button.style.backgroundColor = char.bgHex;
+            }
+
+            const displayName = nameMode === 'stage' ? char.stageName : char.shortRealName;
+
+            button.innerHTML = `
+                <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-lg overflow-hidden mb-1.5 bg-black/20 flex items-center justify-center">
+                    ${char.svg}
+                </div>
+                <span class="text-[10px] sm:text-xs font-bold tracking-tighter text-white truncate w-full text-center leading-tight">
+                    ${displayName}
+                </span>
+                ${isSelected ? `<span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-white shadow"></span>` : ''}
+            `;
+
+            return button;
+        }
+
+        /**
+         * 캐릭터 선택 처리 핸들러
+         */
+        function selectCharacter(group, char) {
+            document.getElementById('error-toast').classList.add('hidden');
+
+            if (group === 'A') {
+                selectedCharA = char;
+                const badge = document.getElementById('selected-a-badge');
+                badge.textContent = `${char.stageName} (${char.realName})`;
+                badge.style.color = '#fcd34d';
+            } else {
+                selectedCharB = char;
+                const badge = document.getElementById('selected-b-badge');
+                badge.textContent = `${char.stageName} (${char.realName})`;
+                badge.style.color = '#7dd3fc';
+            }
+
+            renderCharacterGrids();
+        }
+
+        /**
+         * 이름 표기 모드 변경 (활동명 / 본명)
+         */
+        function updateNameMode(mode) {
+            nameMode = mode;
+            renderCharacterGrids();
+        }
+
+        /**
+         * 한국어 조사('로' / '으로') 자동 판별 함수
+         * 받침이 없거나 'ㄹ' 받침이면 '로', 그 외 받침이 있으면 '으로'
+         */
+        function getParticleRo(word) {
+            if (!word) return '로';
+            const lastChar = word.charCodeAt(word.length - 1);
+            // 한글 음절 범위(0xAC00 ~ 0xD7A3) 확인
+            if (lastChar < 0xAC00 || lastChar > 0xD7A3) return '로';
+            
+            const jongseong = (lastChar - 0xAC00) % 28;
+            // jongseong === 0 (받침 없음) 또는 jongseong === 8 ('ㄹ' 받침)
+            return (jongseong === 0 || jongseong === 8) ? '로' : '으로';
+        }
+
+        /**
+         * 결과 화면(40% - 20% - 40%) 전환 및 데이터 바인딩
+         */
+        function showResultScreen() {
+            const errorToast = document.getElementById('error-toast');
+
+            // 유효성 검사: 둘 다 선택되었는지 확인
+            if (!selectedCharA || !selectedCharB) {
+                errorToast.textContent = "보유 캐릭터와 희망 캐릭터를 모두 선택해주세요!";
+                errorToast.classList.remove('hidden');
+                return;
+            }
+
+            // 동일한 캐릭터를 선택한 경우 안내
+            if (selectedCharA.id === selectedCharB.id) {
+                errorToast.textContent = "서로 다른 캐릭터를 선택해야 교환 메시지를 띄울 수 있어요!";
+                errorToast.classList.remove('hidden');
+                return;
+            }
+
+            // 표기할 이름 결정
+            const nameA = nameMode === 'stage' ? selectedCharA.stageName : selectedCharA.shortRealName;
+            const nameB = nameMode === 'stage' ? selectedCharB.stageName : selectedCharB.shortRealName;
+            const subNameA = nameMode === 'stage' ? selectedCharA.realName : selectedCharA.stageName;
+            const subNameB = nameMode === 'stage' ? selectedCharB.realName : selectedCharB.stageName;
+
+            // 상단 40% (A 캐릭터) 세팅
+            const topPanel = document.getElementById('result-top-panel');
+            topPanel.style.background = selectedCharA.gradient;
+            document.getElementById('res-a-avatar').innerHTML = selectedCharA.svg;
+            document.getElementById('res-a-mainname').textContent = nameA;
+            document.getElementById('res-a-subname').textContent = subNameA;
+            document.getElementById('res-a-enname').textContent = selectedCharA.enName;
+
+            // 하단 40% (B 캐릭터) 세팅
+            const bottomPanel = document.getElementById('result-bottom-panel');
+            bottomPanel.style.background = selectedCharB.gradient;
+            document.getElementById('res-b-avatar').innerHTML = selectedCharB.svg;
+            document.getElementById('res-b-mainname').textContent = nameB;
+            document.getElementById('res-b-subname').textContent = subNameB;
+            document.getElementById('res-b-enname').textContent = selectedCharB.enName;
+
+            // 가운데 20% 텍스트 세팅: '캐릭터A(으)로 캐릭터B 구해요!'
+            const particle = getParticleRo(nameA);
+            const messageEl = document.getElementById('result-message-text');
+            messageEl.innerHTML = `
+                <span style="color: #fde68a;">${nameA}</span>${particle} 
+                <span style="color: #bae6fd;">${nameB}</span> 구해요!
+            `;
+
+            // 화면 전환
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+        }
+
+        /**
+         * 다시 선택 화면으로 돌아가기
+         */
+        function showSelectionScreen() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('selection-screen').classList.remove('hidden');
+        }
+
+        // 페이지 로드 시 초기화
+        window.addEventListener('DOMContentLoaded', () => {
+            renderCharacterGrids();
+        });
+    </script>
+</body>
+</html>
